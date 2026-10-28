@@ -4,21 +4,152 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulador de Examen: Derecho Positivo</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Colores Institucionales UNAM */
-        .color-azul { background-color: #002B5C; }
-        .texto-azul { color: #002B5C; }
-        .color-oro { background-color: #D4AF37; }
-        .texto-oro { color: #D4AF37; }
-        
-        body { background-color: #f3f4f6; }
-        
-        .opcion-label { cursor: pointer; transition: all 0.2s; }
-        .opcion-label:hover { background-color: #e5e7eb; }
-        input[type="radio"]:checked + span { font-weight: bold; color: #002B5C; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #002B5C;
+            color: #ffffff;
+            padding: 25px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 26px;
+        }
+        .header p {
+            margin: 0;
+            color: #d1d5db;
+            font-size: 15px;
+        }
+        .content {
+            padding: 25px;
+        }
+        .instrucciones {
+            color: #4b5563;
+            font-weight: bold;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+        .pregunta-card {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+        .pregunta-titulo {
+            color: #002B5C;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+        .opcion {
+            display: block;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .opcion:hover {
+            background-color: #e5e7eb;
+        }
+        .opcion input {
+            margin-right: 10px;
+        }
+        .btn-principal {
+            width: 100%;
+            background-color: #D4AF37;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 18px;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+        .btn-principal:hover {
+            background-color: #b8952b;
+        }
+        .error-msg {
+            color: #dc2626;
+            font-weight: bold;
+            margin-top: 15px;
+            display: none;
+            text-align: center;
+        }
+        .resultados {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background-color: #f9fafb;
+            border-top: 4px solid #002B5C;
+        }
+        .resultados h2 {
+            color: #002B5C;
+            margin-top: 0;
+        }
+        .puntaje-box {
+            background-color: #ffffff;
+            border: 2px solid #e5e7eb;
+            display: inline-block;
+            padding: 20px 40px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .puntaje-numero {
+            font-size: 48px;
+            font-weight: bold;
+            color: #002B5C;
+            margin: 10px 0;
+        }
+        .btn-imprimir {
+            background-color: #002B5C;
+            color: white;
+            font-weight: bold;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 15px;
+        }
+        .btn-imprimir:hover {
+            background-color: #001a38;
+        }
+        .btn-reiniciar {
+            background-color: #6b7280;
+            color: white;
+            font-weight: bold;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 15px;
+        }
 
-        /* Estilos para impresión (Solo mostrar el resultado) */
+        /* Estilos para guardar/imprimir en PDF */
         @media print {
             body * {
                 visibility: hidden;
@@ -31,128 +162,240 @@
                 left: 0;
                 top: 0;
                 width: 100%;
-                margin-top: 20px;
-                padding: 20px;
                 border: 2px solid #002B5C;
                 border-radius: 10px;
+                padding: 20px;
             }
-            .btn-imprimir {
+            .no-print {
                 display: none !important;
             }
         }
     </style>
 </head>
-<body class="p-4 md:p-8 font-sans">
+<body>
 
-    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="container">
         <!-- Encabezado -->
-        <div class="color-azul p-6 text-center text-white">
-            <h1 class="text-3xl font-bold mb-2">Simulador de Examen: Derecho Positivo</h1>
-            <p class="text-gray-200">Basado en Eduardo García Máynez, Hans Kelsen y Teoría del Derecho</p>
+        <div class="header">
+            <h1>Simulador de Examen: Derecho Positivo</h1>
+            <p>Basado en Eduardo García Máynez, Hans Kelsen y Teoría del Derecho</p>
         </div>
 
-        <!-- Contenedor del Examen -->
-        <div id="quiz-container" class="p-6 md:p-8">
-            <p class="text-gray-600 mb-6 font-semibold border-b pb-2">Selecciona la respuesta correcta para cada pregunta.</p>
-            <div id="preguntas-box" class="space-y-8">
-                <!-- Las preguntas se inyectan aquí con JavaScript -->
-            </div>
+        <!-- Examen -->
+        <div id="quiz-container" class="content">
+            <p class="instrucciones">Selecciona la respuesta correcta para cada una de las 16 preguntas.</p>
             
-            <div id="error-msg" class="text-red-500 font-bold mt-4 hidden">
-                ⚠️ Por favor, responde todas las preguntas antes de calificar.
+            <form id="quiz-form">
+                
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">1. En una comunidad, el Poder Legislativo aprueba una ley que prohíbe el comercio ambulante; sin embargo, ciudadanos y policías la ignoran en la práctica. Desde la perspectiva de Eduardo García Máynez, ¿cuál es la condición de esta norma?</p>
+                    <label class="opcion"><input type="radio" name="p0" value="0"> Es plenamente válida y positiva.</label>
+                    <label class="opcion"><input type="radio" name="p0" value="1"> Carece de validez formal pero tiene positividad.</label>
+                    <label class="opcion"><input type="radio" name="p0" value="2"> Posee validez formal pero carece de positividad.</label>
+                    <label class="opcion"><input type="radio" name="p0" value="3"> Es una norma consuetudinaria.</label>
+                </div>
+
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">2. Según los postulados de la Teoría Pura del Derecho de Hans Kelsen, ¿qué característica distingue al Derecho Positivo frente a la moral o la religión?</p>
+                    <label class="opcion"><input type="radio" name="p1" value="0"> Se basa en el derecho natural divino.</label>
+                    <label class="opcion"><input type="radio" name="p1" value="1"> Es un orden normativo de carácter coactivo.</label>
+                    <label class="opcion"><input type="radio" name="p1" value="2"> Depende del sentido común del juez.</label>
+                    <label class="opcion"><input type="radio" name="p1" value="3"> Su cumplimiento es puramente voluntario.</label>
+                </div>
+
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">3. Un tribunal invalida una ley estatal argumentando que contraviene un artículo de la Constitución Federal. ¿Qué concepto de Kelsen justifica esto?</p>
+                    <label class="opcion"><input type="radio" name="p2" value="0"> El principio de la jerarquía normativa formal.</label>
+                    <label class="opcion"><input type="radio" name="p2" value="1"> El principio de interpretación lógica.</label>
+                    <label class="opcion"><input type="radio" name="p2" value="2"> El postulado de plenitud.</label>
+                    <label class="opcion"><input type="radio" name="p2" value="3"> El método sociológico.</label>
+                </div>
+
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">4. Un juez resuelve un caso sobre 'smart contracts', tema no mencionado explícitamente en el Código Civil. ¿Qué postulado respalda su obligación de fallar?</p>
+                    <label class="opcion"><input type="radio" name="p3" value="0"> El postulado de la ignorancia de la ley.</label>
+                    <label class="opcion"><input type="radio" name="p3" value="1"> El postulado de la plenitud hermética legal.</label>
+                    <label class="opcion"><input type="radio" name="p3" value="2"> El método gramatical.</label>
+                    <label class="opcion"><input type="radio" name="p3" value="3"> El postulado de validez moral.</label>
+                </div>
+
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">5. En relación con las 'lagunas del derecho', ¿cuál es la postura teórica de Hans Kelsen?</p>
+                    <label class="opcion"><input type="radio" name="p4" value="0"> Las lagunas se llenan con la moral externa.</label>
+                    <label class="opcion"><input type="radio" name="p4" value="1"> Afirma que el derecho carece de lagunas reales.</label>
+                    <label class="opcion"><input type="radio" name="p4" value="2"> Las lagunas existen en todas las leyes por defecto.</label>
+                    <label class="opcion"><input type="radio" name="p4" value="3"> El juez no puede resolver si hay una laguna.</label>
+                </div>
+
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">6. El Congreso emite una nueva ley con el único propósito de aclarar el significado de un artículo oscuro en una ley anterior. ¿Qué técnica se emplea?</p>
+                    <label class="opcion"><input type="radio" name="p5" value="0"> Interpretación auténtica.</label>
+                    <label class="opcion"><input type="radio" name="p5" value="1"> Interpretación doctrinal.</label>
+                    <label class="opcion"><input type="radio" name="p5" value="2"> Interpretación judicial.</label>
+                    <label class="opcion"><input type="radio" name="p5" value="3"> Interpretación gramatical.</label>
+                </div>
+
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">7. Un abogado consulta el Diccionario de la Lengua Española para definir estrictamente el término 'fluido' en un caso de robo. ¿Qué método privilegia?</p>
+                    <label class="opcion"><input type="radio" name="p6" value="0"> Interpretación histórica.</label>
+                    <label class="opcion"><input type="radio" name="p6" value="1"> Interpretación teleológica.</label>
+                    <label class="opcion"><input type="radio" name="p6" value="2"> Interpretación literal o gramatical.</label>
+                    <label class="opcion"><input type="radio" name="p6" value="3"> Interpretación sistemática.</label>
+                </div>
+
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">8. Para resolver una antinomia, un Magistrado acude a la exposición de motivos para descubrir la voluntad de los diputados. ¿Qué técnica aplica?</p>
+                    <label class="opcion"><input type="radio" name="p7" value="0"> Técnica de interpretación auténtica.</label>
+                    <label class="opcion"><input type="radio" name="p7" value="1"> Técnica de interpretación gramatical.</label>
+                    <label class="opcion"><input type="radio" name="p7" value="2"> Técnica de interpretación lógica (teleológica/histórica).</label>
+                    <label class="opcion"><input type="radio" name="p7" value="3"> Analogía estricta.</label>
+                </div>
+
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">9. La SCJN resuelve 5 casos consecutivos en el mismo sentido, creando un criterio obligatorio. ¿Qué figura se ha formado?</p>
+                    <label class="opcion"><input type="radio" name="p8" value="0"> Una norma constitucional nueva.</label>
+                    <label class="opcion"><input type="radio" name="p8" value="1"> Una jurisprudencia por reiteración.</label>
+                    <label class="opcion"><input type="radio" name="p8" value="2"> Un reglamento interno.</label>
+                    <label class="opcion"><input type="radio" name="p8" value="3"> Una laguna jurídica.</label>
+                </div>
+
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">10. El Postulado de Unidad establece una regla fundamental para que las normas formen un sistema. ¿Cuál es el requisito indispensable?</p>
+                    <label class="opcion"><input type="radio" name="p9" value="0"> Todas las normas deben derivar de una norma fundamental.</label>
+                    <label class="opcion"><input type="radio" name="p9" value="1"> Todas las normas deben ser leyes penales.</label>
+                    <label class="opcion"><input type="radio" name="p9" value="2"> Deben ser aprobadas unánimemente.</label>
+                    <label class="opcion"><input type="radio" name="p9" value="3"> Deben provenir de la costumbre.</label>
+                </div>
+
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">11. Autores nacionales como Eduardo García Máynez definen al derecho positivo esencialmente como:</p>
+                    <label class="opcion"><input type="radio" name="p10" value="0"> Mandatos de Dios aplicados a la tierra.</label>
+                    <label class="opcion"><input type="radio" name="p10" value="1"> Un conjunto de reglas bilaterales aplicables en un contexto y tiempo determinado.</label>
+                    <label class="opcion"><input type="radio" name="p10" value="2"> Pura lógica sin necesidad de aplicación.</label>
+                    <label class="opcion"><input type="radio" name="p10" value="3"> Reglas internacionales sin coacción.</label>
+                </div>
+
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">12. En la teoría de Kelsen, la 'norma fundamental' (Grundnorm) tiene como propósito principal:</p>
+                    <label class="opcion"><input type="radio" name="p11" value="0"> Dar castigos a los criminales.</label>
+                    <label class="opcion"><input type="radio" name="p11" value="1"> Otorgar validez objetiva a todo el ordenamiento jurídico.</label>
+                    <label class="opcion"><input type="radio" name="p11" value="2"> Ser votada cada 6 años.</label>
+                    <label class="opcion"><input type="radio" name="p11" value="3"> Justificar la moral de la sociedad.</label>
+                </div>
+
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">13. La 'positividad' del derecho, en contraposición a su mera 'validez', se refiere a:</p>
+                    <label class="opcion"><input type="radio" name="p12" value="0"> La observancia y cumplimiento efectivo de las normas por la sociedad.</label>
+                    <label class="opcion"><input type="radio" name="p12" value="1"> Estar escrita en un papel oficial.</label>
+                    <label class="opcion"><input type="radio" name="p12" value="2"> Ser aprobada por el Presidente.</label>
+                    <label class="opcion"><input type="radio" name="p12" value="3"> Estar de acuerdo con los derechos humanos naturales.</label>
+                </div>
+
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">14. Según Kelsen, ¿cuál es la relación entre creación y aplicación del derecho?</p>
+                    <label class="opcion"><input type="radio" name="p13" value="0"> Son procesos totalmente divorciados.</label>
+                    <label class="opcion"><input type="radio" name="p13" value="1"> Las normas regulan su propia creación y aplicación.</label>
+                    <label class="opcion"><input type="radio" name="p13" value="2"> La aplicación depende de la política, no de la norma.</label>
+                    <label class="opcion"><input type="radio" name="p13" value="3"> Solo la creación importa.</label>
+                </div>
+
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">15. ¿Qué significa la regla general 'lo que no está prohibido está permitido' en la plenitud hermética?</p>
+                    <label class="opcion"><input type="radio" name="p14" value="0"> Que todo delito es lícito si nadie se da cuenta.</label>
+                    <label class="opcion"><input type="radio" name="p14" value="1"> Que el juez debe inventar una ley.</label>
+                    <label class="opcion"><input type="radio" name="p14" value="2"> Que el ordenamiento siempre ofrece una solución excluyendo lagunas absolutas.</label>
+                    <label class="opcion"><input type="radio" name="p14" value="3"> Que las autoridades pueden hacer lo que quieran.</label>
+                </div>
+
+                <div class="pregunta-card">
+                    <p class="pregunta-titulo">16. La interpretación que realizan los Jueces y Tribunales en sus sentencias cotidianas se denomina:</p>
+                    <label class="opcion"><input type="radio" name="p15" value="0"> Interpretación auténtica.</label>
+                    <label class="opcion"><input type="radio" name="p15" value="1"> Interpretación doctrinal.</label>
+                    <label class="opcion"><input type="radio" name="p15" value="2"> Interpretación judicial o jurisdiccional.</label>
+                    <label class="opcion"><input type="radio" name="p15" value="3"> Interpretación legislativa.</label>
+                </div>
+
+            </form>
+
+            <div id="error-msg" class="error-msg">
+                ⚠️ Por favor, responde todas las preguntas antes de terminar.
             </div>
 
-            <button onclick="calificarExamen()" class="mt-8 w-full color-oro text-white font-bold py-3 px-4 rounded-lg shadow hover:bg-yellow-500 transition duration-300 text-lg">
-                Terminar y Calificar Examen
-            </button>
+            <button onclick="calificar()" class="btn-principal">Terminar y Calificar Examen</button>
         </div>
 
-        <!-- Sección de Resultados (Oculta inicialmente) -->
-        <div id="seccion-resultados" class="hidden p-8 text-center bg-gray-50 border-t-4 border-blue-900">
-            <h2 class="text-3xl font-bold texto-azul mb-4">Comprobante de Resultados</h2>
-            <p class="text-lg text-gray-700 mb-2">Has finalizado el simulador de Derecho Positivo.</p>
-            
-            <div class="my-6 p-6 bg-white rounded-lg shadow-inner inline-block border-2 border-gray-200">
-                <p class="text-gray-500 font-bold uppercase tracking-wide">Tu Calificación Final</p>
-                <p id="puntaje-texto" class="text-5xl font-extrabold texto-azul mt-2">0/16</p>
-                <p id="mensaje-feedback" class="mt-4 font-semibold text-lg"></p>
+        <!-- Resultados -->
+        <div id="seccion-resultados" class="resultados">
+            <h2>Comprobante de Calificación</h2>
+            <p>Has concluido el examen interactivo de Derecho Positivo.</p>
+
+            <div class="puntaje-box">
+                <div style="color: #6b7280; font-weight: bold; font-size: 14px; text-transform: uppercase;">Calificación Obtenida</div>
+                <div id="puntaje-numero" class="puntaje-numero">0/16</div>
+                <div id="mensaje-feedback" style="font-weight: bold; font-size: 16px;"></div>
             </div>
 
-            <p class="text-sm text-gray-500 mb-6">Módulo: Conceptos, Fundamentación, Estructura e Interpretación del Sistema Jurídico.</p>
+            <br>
 
-            <!-- Botón de Imprimir -->
-            <button onclick="window.print()" class="btn-imprimir color-azul text-white font-bold py-2 px-6 rounded shadow hover:bg-blue-800 transition duration-300">
-                🖨️ Descargar / Imprimir Calificación
-            </button>
-            <button onclick="location.reload()" class="btn-imprimir ml-4 bg-gray-500 text-white font-bold py-2 px-6 rounded shadow hover:bg-gray-600 transition duration-300">
-                🔄 Intentar de nuevo
-            </button>
+            <button onclick="window.print()" class="btn-imprimir no-print">🖨️ Descargar / Imprimir Comprobante PDF</button>
+            <button onclick="location.reload()" class="btn-reiniciar no-print">🔄 Volver a Intentar</button>
         </div>
     </div>
 
     <script>
-        const preguntas = [
-            {
-                q: "1. En una comunidad, el Poder Legislativo aprueba una ley que prohíbe el comercio ambulante; sin embargo, ciudadanos y policías la ignoran en la práctica. Desde la perspectiva de Eduardo García Máynez, ¿cuál es la condición de esta norma?",
-                opciones: ["Es plenamente válida y positiva.", "Carece de validez formal pero tiene positividad.", "Posee validez formal pero carece de positividad.", "Es una norma consuetudinaria."],
-                correcta: 2
-            },
-            {
-                q: "2. Según los postulados de la Teoría Pura del Derecho de Hans Kelsen, ¿qué característica distingue al Derecho Positivo frente a la moral o la religión?",
-                opciones: ["Se basa en el derecho natural divino.", "Es un orden normativo de carácter coactivo.", "Depende del sentido común del juez.", "Su cumplimiento es puramente voluntario."],
-                correcta: 1
-            },
-            {
-                q: "3. Un tribunal invalida una ley estatal argumentando que contraviene un artículo de la Constitución Federal. ¿Qué concepto de Kelsen justifica esto?",
-                opciones: ["El principio de la jerarquía normativa formal.", "El principio de interpretación lógica.", "El postulado de plenitud.", "El método sociológico."],
-                correcta: 0
-            },
-            {
-                q: "4. Un juez resuelve un caso sobre 'smart contracts', tema no mencionado explícitamente en el Código Civil. ¿Qué postulado respalda su obligación de fallar?",
-                opciones: ["El postulado de la ignorancia de la ley.", "El postulado de la plenitud hermética legal.", "El método gramatical.", "El postulado de validez moral."],
-                correcta: 1
-            },
-            {
-                q: "5. En relación con las 'lagunas del derecho', ¿cuál es la postura teórica de Hans Kelsen?",
-                opciones: ["Las lagunas se llenan con la moral externa.", "Afirma que el derecho carece de lagunas reales.", "Las lagunas existen en todas las leyes por defecto.", "El juez no puede resolver si hay una laguna."],
-                correcta: 1
-            },
-            {
-                q: "6. El Congreso emite una nueva ley con el único propósito de aclarar el significado de un artículo oscuro en una ley anterior. ¿Qué técnica se emplea?",
-                opciones: ["Interpretación auténtica.", "Interpretación doctrinal.", "Interpretación judicial.", "Interpretación gramatical."],
-                correcta: 0
-            },
-            {
-                q: "7. Un abogado consulta el Diccionario de la Lengua Española para definir estrictamente el término 'fluido' en un caso de robo. ¿Qué método privilegia?",
-                opciones: ["Interpretación histórica.", "Interpretación teleológica.", "Interpretación literal o gramatical.", "Interpretación sistemática."],
-                correcta: 2
-            },
-            {
-                q: "8. Para resolver una antinomia, un Magistrado acude a la exposición de motivos para descubrir la voluntad de los diputados. ¿Qué técnica aplica?",
-                opciones: ["Técnica de interpretación auténtica.", "Técnica de interpretación gramatical.", "Técnica de interpretación lógica (teleológica/histórica).", "Analogía estricta."],
-                correcta: 2
-            },
-            {
-                q: "9. La SCJN resuelve 5 casos consecutivos en el mismo sentido, creando un criterio obligatorio. ¿Qué figura se ha formado?",
-                opciones: ["Una norma constitucional nueva.", "Una jurisprudencia por reiteración.", "Un reglamento interno.", "Una laguna jurídica."],
-                correcta: 1
-            },
-            {
-                q: "10. El Postulado de Unidad establece una regla fundamental para que las normas formen un sistema. ¿Cuál es el requisito indispensable?",
-                opciones: ["Todas las normas deben derivar de una norma fundamental.", "Todas las normas deben ser leyes penales.", "Deben ser aprobadas unánimemente.", "Deben provenir de la costumbre."],
-                correcta: 0
-            },
-            {
-                q: "11. Autores nacionales como Eduardo García Máynez definen al derecho positivo esencialmente como:",
-                opciones: ["Mandatos de Dios aplicados a la tierra.", "Un conjunto de reglas bilaterales aplicables en un contexto y tiempo determinado.", "Pura lógica sin necesidad de aplicación.", "Reglas internacionales sin coacción."],
-                correcta: 1
-            },
-            {
-                q: "12. En la teoría de Kelsen, la 'norma fundamental' (Grundnorm) tiene como propósito principal:",
-                opciones: ["Dar castigos a los criminales.", "Otorgar validez objetiva a todo el ordenamiento jurídico.", "Ser votada cada 6 años.", "Justificar la moral de la sociedad."],
-                correcta: 1
-            },
-            {
-                q: "13. La 'positividad' del derecho, en contraposición a su mera 'validez', se refiere a:",
-                opciones: ["La observancia y cumplimiento efectivo de las normas por la sociedad.", "Estar escrita en un papel oficial.", "Ser aprobada por el Presidente.", "Estar de acuerdo con los derechos humanos naturales."],
-                correcta: 0
+        // Respuestas correctas (índices 0 a 3)
+        const respuestasCorrectas = [2, 1, 0, 1, 1, 0, 2, 2, 1, 0, 1, 1, 0, 1, 2, 2];
+
+        function calificar() {
+            let aciertos = 0;
+            let todasRespondidas = true;
+
+            for (let i = 0; i < 16; i++) {
+                const opciones = document.getElementsByName('p' + i);
+                let respondida = false;
+
+                for (let opcion of opciones) {
+                    if (opcion.checked) {
+                        respondida = true;
+                        if (parseInt(opcion.value) === respuestasCorrectas[i]) {
+                            aciertos++;
+                        }
+                    }
+                }
+
+                if (!respondida) {
+                    todasRespondidas = false;
+                }
+            }
+
+            if (!todasRespondidas) {
+                document.getElementById('error-msg').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('error-msg').style.display = 'none';
+            document.getElementById('quiz-container').style.display = 'none';
+            document.getElementById('seccion-resultados').style.display = 'block';
+
+            document.getElementById('puntaje-numero').innerText = aciertos + ' / 16';
+
+            const feedback = document.getElementById('mensaje-feedback');
+            if (aciertos === 16) {
+                feedback.innerText = '¡Felicidades! Calificación Perfecta. 🏆';
+                feedback.style.color = '#16a34a';
+            } else if (aciertos >= 12) {
+                feedback.innerText = '¡Excelente trabajo! Tienes un gran dominio del tema. 👍';
+                feedback.style.color = '#2563eb';
+            } else if (aciertos >= 8) {
+                feedback.innerText = 'Aprobado. Te sugiero repasar a García Máynez y Kelsen. 📚';
+                feedback.style.color = '#d97706';
+            } else {
+                feedback.innerText = 'Atención: Es necesario estudiar nuevamente la teoría. 📝';
+                feedback.style.color = '#dc2626';
+            }
+
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
